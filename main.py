@@ -1,38 +1,19 @@
 from flask import Flask, Response
-from flask_sqlalchemy import SQLAlchemy
 import json
 import os
 from dotenv import load_dotenv
+from models import *
 
 
+# load .env
 load_dotenv()
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
-db = SQLAlchemy(app)
+db.init_app(app)
 
-
-class Guest(db.Model):
-
-    __tablename__ = 'guest'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    email = db.Column(db.String, unique=True)
-
-    def __iter__(self):
-        yield 'id', self.id
-        yield 'name', self.name
-        yield 'email', self.email
-
-
-def objects_to_dict(_list):
-    i = 0
-    for obj in _list:
-        _list[i] = dict(obj)
-        i += 1
-
-    return _list
+# generate tables if not exist
+db.create_all(app=app)
 
 
 @app.route('/')
@@ -42,10 +23,20 @@ def index():
 
 @app.route('/guest')
 def get_guest():
+    
     guest = Guest.query.all()
-    guest = objects_to_dict(guest)
 
-    return Response(json.dumps(guest), mimetype='application/json')
+    return Response(json.dumps(guest, cls=JsonEncoder), mimetype='application/json')
+
+
+# to prevent unserializable object
+class JsonEncoder(json.JSONEncoder):
+
+    def default(self, obj):
+        if isinstance(obj, object):
+            return dict(obj)
+
+        return json.JSONEncoder.default(self, obj)
 
 
 if __name__ == '__main__':
