@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+    dataserver:
+        container_name: dataserver
+        image: postgres
+        ports: 
+            - 5432:5432
+        environment: 
+            - POSTGRES_USER=hiwijaya
+            - POSTGRES_PASSWORD=rahasia
+            - POSTGRES_DB=test
+        networks: 
+            - python_network
+    appserver:
+        container_name: appserver
+        image: app-python:1.2
+        ports:
+            - 5000:5000
+        depends_on: 
+            - dataserver
+        environment: 
+            - NAME=LIAM ABRAHAM WIJAYA
+            - DATABASE_URI=postgresql+psycopg2://hiwijaya:rahasia@dataserver:5432/test
+        networks: 
+            - python_network
+
+networks: 
+    python_network:
+        name: python_network
