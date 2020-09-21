@@ -5,7 +5,7 @@ services:
         container_name: dataserver
         image: postgres
         ports: 
-            - 5432:5432
+            - 5433:5432
         environment: 
             - POSTGRES_USER=hiwijaya
             - POSTGRES_PASSWORD=rahasia
